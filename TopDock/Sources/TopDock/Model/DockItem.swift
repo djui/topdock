@@ -9,6 +9,8 @@ struct DockItem: Identifiable, Equatable {
     var isRunning: Bool
     var isActive: Bool
     var isHidden: Bool
+    /// Notification badge text from the Dock, e.g. "3".
+    var badge: String?
 
     var runningApp: NSRunningApplication? {
         pid.flatMap { NSRunningApplication(processIdentifier: $0) }

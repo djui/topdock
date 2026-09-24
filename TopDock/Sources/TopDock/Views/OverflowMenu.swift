@@ -39,6 +39,9 @@ struct MenuFactory {
                 entry.state = .on
                 entry.onStateImage = runningImage
             }
+            if let badge = item.badge {
+                entry.badge = NSMenuItemBadge(string: badge)
+            }
             menu.addItem(entry)
         }
         if !items.isEmpty { menu.addItem(.separator()) }

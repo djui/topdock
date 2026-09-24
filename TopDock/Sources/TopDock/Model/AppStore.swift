@@ -17,6 +17,7 @@ final class AppStore {
     var onChange: (() -> Void)?
 
     private let prefs: Preferences
+    private let badges = BadgeReader()
     private let ownPID = ProcessInfo.processInfo.processIdentifier
     private var bundleIDs: [String: String] = [:]
     private var observers: [NSObjectProtocol] = []
@@ -44,6 +45,8 @@ final class AppStore {
         timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.rebuild() }
         }
+        badges.onChange = { [weak self] in self?.rebuild() }
+        badges.start()
         rebuild()
     }
 
@@ -65,14 +68,16 @@ final class AppStore {
 
         func makeItem(id: String, url: URL) -> DockItem {
             let app = runningByID[id]
+            let name = app?.localizedName ?? Self.displayName(for: url)
             return DockItem(
                 id: id,
                 url: app?.bundleURL ?? url,
-                name: app?.localizedName ?? Self.displayName(for: url),
+                name: name,
                 pid: app?.processIdentifier,
                 isRunning: app != nil,
                 isActive: app != nil && app?.processIdentifier == frontPID,
-                isHidden: app?.isHidden ?? false
+                isHidden: app?.isHidden ?? false,
+                badge: prefs.showBadges ? badges.badge(for: url, name: name) : nil
             )
         }
 

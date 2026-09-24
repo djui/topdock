@@ -24,7 +24,8 @@ empty center of the menu bar, so you can hide the real Dock and still switch app
   "dynamic island" apps are treated the same way.
 - **Hides with the menu bar**, both for fullscreen apps and with "Automatically hide and show
   the menu bar".
-- Running-app dots, a highlight on the active app, and dimmed icons for hidden apps.
+- Running-app dots, the Dock's red notification badges, a highlight on the active app, and
+  dimmed icons for hidden apps.
 - Right-click an icon to Show in Finder, Hide, or Quit (hold ⌥ for Force Quit).
 - Multiple displays, launch at login, adjustable icon size, magnification and slot count.
 - An optional menu bar icon and an About window linking back to this project.

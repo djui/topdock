@@ -58,6 +58,12 @@ struct SettingsView: View {
                     Text("Magnification")
                 }
                 .disabled(!prefs.magnify)
+                VStack(alignment: .leading, spacing: 4) {
+                    Toggle("Show notification badges", isOn: $prefs.showBadges)
+                    Text("Shows the same red badges as the Dock. Requires Accessibility access.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Section("Content") {

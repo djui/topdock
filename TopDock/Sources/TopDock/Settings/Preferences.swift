@@ -9,6 +9,7 @@ final class Preferences {
     var iconSize: Double { didSet { save("iconSize", iconSize) } }
     var iconSpacing: Double { didSet { save("iconSpacing", iconSpacing) } }
     var magnify: Bool { didSet { save("magnify", magnify) } }
+    var showBadges: Bool { didSet { save("showBadges", showBadges) } }
     var magnification: Double { didSet { save("magnification", magnification) } }
     var maxSlots: Int { didSet { save("maxSlots", maxSlots) } }
     var allDisplays: Bool { didSet { save("allDisplays", allDisplays) } }
@@ -28,6 +29,7 @@ final class Preferences {
             "iconSize": 18.0,
             "iconSpacing": 2.0,
             "magnify": true,
+            "showBadges": true,
             "magnification": 1.8,
             "maxSlots": 40,
             "allDisplays": false,
@@ -39,6 +41,7 @@ final class Preferences {
         iconSize = d.double(forKey: "iconSize")
         iconSpacing = d.double(forKey: "iconSpacing")
         magnify = d.bool(forKey: "magnify")
+        showBadges = d.bool(forKey: "showBadges")
         magnification = d.double(forKey: "magnification")
         maxSlots = d.integer(forKey: "maxSlots")
         allDisplays = d.bool(forKey: "allDisplays")
