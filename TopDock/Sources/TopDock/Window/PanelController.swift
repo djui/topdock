@@ -57,7 +57,7 @@ final class SegmentPanel {
         if id != lastHoveredID {
             lastHoveredID = id
             if haptics, id != nil {
-                NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+                Haptics.shared.tap()
             }
         }
     }
