@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct StripView: View {
     let model: SegmentModel
@@ -11,28 +10,38 @@ struct StripView: View {
         ZStack(alignment: .topLeading) {
             Color.clear
 
-            ForEach(Array(model.items.enumerated()), id: \.element.id) { index, item in
+            ForEach(Array(model.entries.enumerated()), id: \.element.id) { index, entry in
                 let slot = slots[index]
-                let size = model.iconSize * slot.scale
 
-                IconView(item: item, size: size)
-                    .frame(width: slot.width, height: size)
-                    .contentShape(Rectangle())
-                    .onTapGesture { model.onOpen(item) }
-                    .onDrag { NSItemProvider(object: item.url as NSURL) }
-                    .help(item.name)
-                    .position(x: model.inset + slot.centerX, y: model.iconTop + size / 2)
+                switch entry {
+                case .app(let item):
+                    let size = model.iconSize * slot.scale
 
-                if item.isRunning && model.indicator == nil {
-                    RunningDot(isActive: item.isActive)
-                        .position(x: model.inset + slot.centerX, y: model.iconTop + size + 2.5)
+                    IconView(item: item, size: size)
+                        .frame(width: slot.width, height: size)
+                        .contentShape(Rectangle())
+                        .onTapGesture { model.onOpen(item) }
+                        .help(item.name)
+                        .position(x: model.inset + slot.centerX, y: model.iconTop + size / 2)
+
+                    if item.isRunning && model.indicator == nil {
+                        RunningDot(isActive: item.isActive)
+                            .position(x: model.inset + slot.centerX, y: model.iconTop + size + 2.5)
+                            .allowsHitTesting(false)
+                    }
+
+                case .divider:
+                    Capsule()
+                        .fill(.primary.opacity(0.3))
+                        .frame(width: 1, height: model.barHeight * 0.6)
+                        .position(x: model.inset + slot.centerX, y: model.barHeight / 2)
                         .allowsHitTesting(false)
                 }
             }
 
-            if let hovered, hovered < model.items.count {
+            if let hovered, let item = model.entries[hovered].item {
                 let slot = slots[hovered]
-                Text(model.items[hovered].name)
+                Text(item.name)
                     .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
                     .fixedSize()
@@ -66,16 +75,6 @@ struct StripView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .ignoresSafeArea()
-        .onDrop(of: [.fileURL], isTargeted: nil) { providers, location in
-            let index = model.insertionIndex(atPanelX: location.x)
-            for provider in providers {
-                _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                    guard let url else { return }
-                    Task { @MainActor in model.onDrop(url, index) }
-                }
-            }
-            return !providers.isEmpty
-        }
     }
 }
 

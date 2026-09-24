@@ -1,11 +1,28 @@
 import AppKit
 import Observation
 
+enum StripEntry: Equatable, Identifiable {
+    case app(DockItem)
+    /// Separates the Dock's kept apps from other running and recent apps.
+    case divider
+
+    var id: String {
+        switch self {
+        case .app(let item): item.id
+        case .divider: "divider"
+        }
+    }
+
+    var item: DockItem? {
+        if case .app(let item) = self { item } else { nil }
+    }
+}
+
 /// View state for one strip of icons (one per screen, or one on each side of the notch).
 @MainActor
 @Observable
 final class SegmentModel {
-    var items: [DockItem] = []
+    var entries: [StripEntry] = []
     var overflowCount = 0
     var showChevron = false
     var iconSize: CGFloat = 18
@@ -22,41 +39,50 @@ final class SegmentModel {
 
     @ObservationIgnored var onOpen: (DockItem) -> Void = { _ in }
     @ObservationIgnored var onChevron: () -> Void = {}
-    @ObservationIgnored var onDrop: (URL, Int) -> Void = { _, _ in }
 
     static let chevronWidth: CGFloat = 24
+    static let dividerWidth: CGFloat = 9
 
     var slot: CGFloat { iconSize + spacing }
-    var stripWidth: CGFloat { CGFloat(items.count) * slot }
     var iconTop: CGFloat { max(0, (barHeight - iconSize) / 2 - 1.5) }
+
+    var baseWidths: [CGFloat] {
+        entries.map { $0.item == nil ? Self.dividerWidth : slot }
+    }
+
+    var stripWidth: CGFloat { baseWidths.reduce(0, +) }
 
     func layout() -> [IconSlot] {
         Magnification.layout(
-            count: items.count,
-            slot: slot,
+            widths: baseWidths,
+            scalable: entries.map { $0.item != nil },
             mouseX: magnify ? mouseX : nil,
-            maxScale: maxScale
+            maxScale: maxScale,
+            reach: slot * 2.5
         )
     }
 
+    /// Index of the app entry under the cursor in the unscaled layout.
     var hoveredIndex: Int? {
         guard let mouseX, mouseX >= 0, mouseX < stripWidth else { return nil }
-        return min(Int(mouseX / slot), items.count - 1)
+        var left: CGFloat = 0
+        for (index, width) in baseWidths.enumerated() {
+            if mouseX < left + width { return entries[index].item == nil ? nil : index }
+            left += width
+        }
+        return nil
     }
 
-    /// Index of the icon at `x` in panel coordinates, using the magnified layout.
-    func itemIndex(atPanelX x: CGFloat) -> Int? {
+    /// The app at `x` in panel coordinates, using the magnified layout.
+    func item(atPanelX x: CGFloat) -> DockItem? {
         let stripX = x - inset
-        return layout().firstIndex { abs($0.centerX - stripX) <= $0.width / 2 }
+        let slots = layout()
+        return slots.indices
+            .first { abs(slots[$0].centerX - stripX) <= slots[$0].width / 2 }
+            .flatMap { entries[$0].item }
     }
 
-    /// Where an item dropped at `x` (panel coordinates) should be inserted.
-    func insertionIndex(atPanelX x: CGFloat) -> Int {
-        let stripX = x - inset
-        return layout().firstIndex { stripX < $0.centerX } ?? items.count
-    }
-
-    /// Right edge of the icons in strip coordinates, including magnification.
+    /// Right edge of the entries in strip coordinates, including magnification.
     func contentMaxX(_ slots: [IconSlot]) -> CGFloat {
         max(stripWidth, slots.last.map { $0.centerX + $0.width / 2 } ?? 0)
     }

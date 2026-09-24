@@ -13,21 +13,19 @@ empty center of the menu bar, so you can hide the real Dock and still switch app
 
 - **Fits the space that's actually free.** TopDock measures the gap between the frontmost app's
   menus and the status items, and recomputes whenever you switch apps.
-- **Most relevant apps first.** Pinned apps, then running apps ordered by how recently you used
-  them, then a few recently used apps that aren't running anymore. Launch order and
-  alphabetical sorting are available too.
+- **Same order as your Dock.** Finder and the apps you keep in the Dock come first, in the
+  Dock's order. After a divider come other running apps and up to 3 of the Dock's recent
+  apps, or fewer when space runs out. Rearrange apps in the Dock and TopDock follows.
 - **Overflow that doesn't get in the way.** Apps that don't fit collapse into a `+N` chevron
   menu. Scrolling or swiping over the icons pages through the full list.
 - **Dock-style magnification** on hover, with the app name shown below the icon.
-- **Notch-aware.** On MacBooks with a notch the icons split around it, with the most recent
-  apps closest to the notch. Top-center overlays such as notch or "dynamic island" apps are
-  treated the same way.
+- **Notch-aware.** On MacBooks with a notch the icons continue from the left side of the notch
+  to the right, keeping the Dock's order. Top-center overlays such as notch or
+  "dynamic island" apps are treated the same way.
 - **Hides with the menu bar**, both for fullscreen apps and with "Automatically hide and show
   the menu bar".
 - Running-app dots, a highlight on the active app, and dimmed icons for hidden apps.
-- Right-click an icon to Pin/Unpin, Show in Finder, Hide, or Quit (hold ⌥ for Force Quit).
-- Drag an app from Finder onto TopDock to pin it; drag pinned icons to reorder them.
-  You can also import your existing Dock pins.
+- Right-click an icon to Show in Finder, Hide, or Quit (hold ⌥ for Force Quit).
 - Multiple displays, launch at login, adjustable icon size, magnification and slot count.
 - An optional menu bar icon and an About window linking back to this project.
 

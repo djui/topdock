@@ -7,17 +7,15 @@ import SwiftUI
 @MainActor
 final class SettingsWindowController {
     private let prefs: Preferences
-    private let store: AppStore
     private var window: NSWindow?
 
-    init(prefs: Preferences, store: AppStore) {
+    init(prefs: Preferences) {
         self.prefs = prefs
-        self.store = store
     }
 
     func show() {
         if window == nil {
-            let controller = NSHostingController(rootView: SettingsView(prefs: prefs, store: store))
+            let controller = NSHostingController(rootView: SettingsView(prefs: prefs))
             let window = NSWindow(contentViewController: controller)
             window.title = "TopDock Settings"
             window.styleMask = [.titled, .closable, .miniaturizable]
@@ -32,17 +30,9 @@ final class SettingsWindowController {
 
 struct SettingsView: View {
     @Bindable var prefs: Preferences
-    let store: AppStore
 
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var accessibilityTrusted = AXIsProcessTrusted()
-    @State private var pinCount: Int
-
-    init(prefs: Preferences, store: AppStore) {
-        self.prefs = prefs
-        self.store = store
-        _pinCount = State(initialValue: store.pinnedPaths.count)
-    }
 
     private var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
@@ -65,28 +55,8 @@ struct SettingsView: View {
             }
 
             Section("Content") {
-                Picker("Order running apps by", selection: $prefs.sortMode) {
-                    ForEach(SortMode.allCases) { Text($0.title).tag($0) }
-                }
-                Toggle("Show pinned apps first", isOn: $prefs.showPinned)
-                Toggle("Show recently used apps that aren't running", isOn: $prefs.showRecents)
-                Stepper("Recent apps: \(prefs.recentsLimit)", value: $prefs.recentsLimit, in: 1...12)
-                    .disabled(!prefs.showRecents)
-                Stepper("Maximum icons in the menu bar: \(prefs.maxSlots)", value: $prefs.maxSlots, in: 3...40)
-                LabeledContent("Pinned apps: \(pinCount)") {
-                    HStack {
-                        Button("Import from Dock") {
-                            store.importDockPins()
-                            pinCount = store.pinnedPaths.count
-                        }
-                        Button("Clear") {
-                            store.clearPins()
-                            pinCount = store.pinnedPaths.count
-                        }
-                        .disabled(pinCount == 0)
-                    }
-                }
-                Text("Drag an app from Finder onto TopDock to pin it, or drag pinned icons to reorder them. Scroll over the icons to page through apps that don't fit.")
+                Stepper("Maximum icons in the menu bar: \(prefs.maxSlots)", value: $prefs.maxSlots, in: 3...60)
+                Text("TopDock follows your Dock: Finder and the apps kept in the Dock in the same order, then other running apps and the Dock's recent apps. Change the order or \"Show suggested and recent apps\" in the Dock itself. Scroll over the icons to page through apps that don't fit.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

@@ -19,7 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let prefs = Preferences()
     private lazy var store = AppStore(prefs: prefs)
     private lazy var panels = PanelController(store: store, prefs: prefs)
-    private lazy var settings = SettingsWindowController(prefs: prefs, store: store)
+    private lazy var settings = SettingsWindowController(prefs: prefs)
     private let statusItem = StatusItemController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {

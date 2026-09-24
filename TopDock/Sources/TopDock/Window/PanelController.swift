@@ -168,10 +168,9 @@ final class PanelController {
     func relayout() {
         StatusItemsProbe.refreshIfNeeded()
         let windows = WindowList.snapshot()
-        let items = store.items
+        let dock = store.layout
+        let mainApps = dock.dockApps + dock.otherRunning
         let slot = prefs.iconSize + 5
-        let pad = SegmentPanel.padding
-        let chevronWidth = SegmentModel.chevronWidth
 
         var screens = NSScreen.screens
         if !prefs.allDisplays || !NSScreen.screensHaveSeparateSpaces {
@@ -186,32 +185,29 @@ final class PanelController {
             let segments = layout.segments
             let lastIndex = segments.count - 1
 
-            func capacities(chevron: Bool) -> [Int] {
-                segments.enumerated().map { index, segment in
-                    let reserved = 2 * pad + (chevron && index == lastIndex ? chevronWidth : 0)
-                    return max(0, Int((segment.rect.width - reserved) / slot))
-                }
+            let offset = min(scrollOffset, max(0, mainApps.count - 1))
+            let main = entries(dockApps: dock.dockApps, otherRunning: dock.otherRunning, skipping: offset)
+
+            var widths = segments.map { $0.rect.width - 2 * SegmentPanel.padding }
+            var fitted = fill(main, into: widths, slot: slot)
+            let needsChevron = fitted.consumed < main.count || offset > 0
+            if needsChevron {
+                widths[lastIndex] -= SegmentModel.chevronWidth
+                fitted = fill(main, into: widths, slot: slot)
+            } else if !dock.recents.isEmpty {
+                // Recent apps only use space left over after the Dock's and running apps.
+                let divider: [StripEntry] = dock.otherRunning.isEmpty ? [.divider] : []
+                fitted = fill(main + divider + dock.recents.map(StripEntry.app), into: widths, slot: slot)
             }
 
-            var caps = capacities(chevron: false)
-            let needsChevron = items.count > min(caps.reduce(0, +), prefs.maxSlots)
-            if needsChevron { caps = capacities(chevron: true) }
-            while caps.reduce(0, +) > prefs.maxSlots, let largest = caps.indices.max(by: { caps[$0] < caps[$1] }) {
-                caps[largest] -= 1
-            }
-            let capacity = caps.reduce(0, +)
+            let visibleIDs = Set(fitted.groups.joined().compactMap(\.item?.id))
+            let overflow = mainApps.filter { !visibleIDs.contains($0.id) }
+            let visibleMainCount = mainApps.count - overflow.count
+            maxOffset = max(maxOffset, overflow.count)
 
-            let screenMaxOffset = max(0, items.count - capacity)
-            maxOffset = max(maxOffset, screenMaxOffset)
-            let offset = min(scrollOffset, screenMaxOffset)
-            let visible = Array(items.dropFirst(offset).prefix(capacity))
-            let visibleIDs = Set(visible.map(\.id))
-            let overflow = items.filter { !visibleIDs.contains($0.id) }
-
-            let groups = distribute(visible, capacities: caps, notched: segments.count == 2)
-            let showIndicator = Date() < indicatorUntil && items.count > capacity
-            let indicator: ClosedRange<Double>? = showIndicator && !items.isEmpty
-                ? Double(offset) / Double(items.count)...Double(offset + visible.count) / Double(items.count)
+            let showIndicator = Date() < indicatorUntil && needsChevron && !mainApps.isEmpty
+            let indicator: ClosedRange<Double>? = showIndicator
+                ? Double(offset) / Double(mainApps.count)...Double(offset + visibleMainCount) / Double(mainApps.count)
                 : nil
 
             for (index, segment) in segments.enumerated() {
@@ -222,7 +218,7 @@ final class PanelController {
                 panel.screen = screen
                 configure(
                     panel,
-                    items: groups[index],
+                    entries: fitted.groups[index],
                     overflow: index == lastIndex && needsChevron ? overflow : nil,
                     segment: segment,
                     barHeight: layout.barHeight,
@@ -239,36 +235,60 @@ final class PanelController {
         updateVisibility()
     }
 
-    /// On notched screens items alternate right/left of the notch so the most relevant
-    /// ones sit closest to it; the left group is reversed because it grows leftwards.
-    private func distribute(_ items: [DockItem], capacities: [Int], notched: Bool) -> [[DockItem]] {
-        guard notched else { return [items] }
-        var left: [DockItem] = []
-        var right: [DockItem] = []
-        var preferRight = true
-        for item in items {
-            let rightHasRoom = right.count < capacities[1]
-            let leftHasRoom = left.count < capacities[0]
-            if (preferRight && rightHasRoom) || !leftHasRoom {
-                right.append(item)
-            } else {
-                left.append(item)
+    /// The Dock's apps, a divider, then other running apps, starting `offset` apps in.
+    private func entries(dockApps: [DockItem], otherRunning: [DockItem], skipping offset: Int) -> [StripEntry] {
+        let dockPart = dockApps.dropFirst(offset).map(StripEntry.app)
+        let runningPart = otherRunning.dropFirst(max(0, offset - dockApps.count)).map(StripEntry.app)
+        let divider: [StripEntry] = dockPart.isEmpty || runningPart.isEmpty ? [] : [.divider]
+        return dockPart + divider + runningPart
+    }
+
+    /// Places a prefix of `entries` into the segments left to right, keeping their order.
+    /// Stops at the first entry that doesn't fit or once `maxSlots` apps are placed.
+    private func fill(
+        _ entries: [StripEntry],
+        into widths: [CGFloat],
+        slot: CGFloat
+    ) -> (groups: [[StripEntry]], consumed: Int) {
+        var groups = Array(repeating: [StripEntry](), count: widths.count)
+        var segment = 0
+        var usedWidth: CGFloat = 0
+        var apps = 0
+        var consumed = 0
+
+        placing: for entry in entries {
+            let isDivider = entry.item == nil
+            if !isDivider && apps >= prefs.maxSlots { break }
+            let width = isDivider ? SegmentModel.dividerWidth : slot
+            while usedWidth + width > widths[segment] {
+                segment += 1
+                usedWidth = 0
+                if segment == widths.count { break placing }
             }
-            preferRight.toggle()
+            consumed += 1
+            // A divider at the start of a segment separates nothing.
+            if isDivider && groups[segment].isEmpty { continue }
+            groups[segment].append(entry)
+            usedWidth += width
+            if !isDivider { apps += 1 }
         }
-        return [left.reversed(), right]
+
+        for index in groups.indices where groups[index].last == .divider {
+            groups[index].removeLast()
+        }
+        return (groups, consumed)
     }
 
     private func configure(
         _ panel: SegmentPanel,
-        items: [DockItem],
+        entries: [StripEntry],
         overflow: [DockItem]?,
         segment: MenuBarSegment,
         barHeight: CGFloat,
         indicator: ClosedRange<Double>?
     ) {
         let model = panel.model
-        if model.items != items { model.items = items }
+        if model.entries != entries { model.entries = entries }
         model.showChevron = overflow != nil
         model.overflowCount = overflow?.count ?? 0
         model.iconSize = prefs.iconSize
@@ -281,17 +301,12 @@ final class PanelController {
         model.onChevron = { [weak self] in
             self?.popUp(self?.menus.overflowMenu(for: overflow ?? []))
         }
-        model.onDrop = { [weak self, weak model] url, index in
-            let before = model.flatMap { index < $0.items.count ? $0.items[index].id : nil }
-            self?.store.pin(url, before: before)
-        }
-
         panel.panel.collectionBehavior = prefs.hideWhenMenuBarHidden
             ? DockPanel.baseBehavior
             : DockPanel.baseBehavior.union(.fullScreenAuxiliary)
 
         let width = 2 * SegmentPanel.padding
-            + CGFloat(items.count) * model.slot
+            + model.stripWidth
             + (overflow != nil ? SegmentModel.chevronWidth : 0)
         let rect = segment.rect
         let x: CGFloat
@@ -303,7 +318,7 @@ final class PanelController {
         case .leading:
             x = rect.minX
         }
-        panel.hasContent = !items.isEmpty || overflow != nil
+        panel.hasContent = !entries.isEmpty || overflow != nil
         panel.setBaseFrame(NSRect(x: x.rounded(), y: rect.maxY - barHeight, width: width, height: barHeight))
     }
 
@@ -344,8 +359,8 @@ final class PanelController {
             return true
         case .rightMouseDown:
             let menu: NSMenu
-            if let index = panel.model.itemIndex(atPanelX: event.locationInWindow.x) {
-                menu = menus.contextMenu(for: panel.model.items[index])
+            if let item = panel.model.item(atPanelX: event.locationInWindow.x) {
+                menu = menus.contextMenu(for: item)
             } else {
                 menu = menus.appMenu()
             }

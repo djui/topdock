@@ -9,7 +9,6 @@ struct DockItem: Identifiable, Equatable {
     var isRunning: Bool
     var isActive: Bool
     var isHidden: Bool
-    var isPinned: Bool
 
     var runningApp: NSRunningApplication? {
         pid.flatMap { NSRunningApplication(processIdentifier: $0) }

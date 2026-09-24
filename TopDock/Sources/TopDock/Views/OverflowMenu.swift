@@ -50,11 +50,6 @@ struct MenuFactory {
         let menu = NSMenu()
         let optionHeld = NSEvent.modifierFlags.contains(.option)
 
-        if item.isPinned {
-            menu.addItem(ClosureMenuItem("Unpin from TopDock") { store.unpin(item) })
-        } else {
-            menu.addItem(ClosureMenuItem("Pin to TopDock") { store.pin(item.url) })
-        }
         menu.addItem(ClosureMenuItem("Show in Finder") { store.revealInFinder(item) })
 
         if item.isRunning {
@@ -79,7 +74,6 @@ struct MenuFactory {
     }
 
     private func appendAppItems(to menu: NSMenu) {
-        menu.addItem(ClosureMenuItem("Import Pins from Dock") { store.importDockPins() })
         menu.addItem(ClosureMenuItem("TopDock Settings…") { openSettings() })
         menu.addItem(ClosureMenuItem("About TopDock") { openAbout() })
         menu.addItem(ClosureMenuItem("Quit TopDock") { NSApp.terminate(nil) })
