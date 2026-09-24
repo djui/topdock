@@ -53,9 +53,11 @@ has no Dock icon of its own.
 
 ## Build from source
 
-Requires Xcode 16 or newer (Swift 6) and macOS 14 or newer.
+Requires Xcode 16 or newer (Swift 6) and macOS 14 or newer. The app lives in the
+[`TopDock/`](TopDock) folder; run all commands from there.
 
 ```sh
+cd TopDock
 swift run                 # run a debug build
 scripts/bundle.sh         # universal dist/TopDock.app (ad-hoc signed)
 scripts/package.sh        # plus dist/TopDock-<version>.zip, .dmg and checksums.txt

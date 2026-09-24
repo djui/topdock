@@ -10,6 +10,9 @@ permissions:
 jobs:
   release:
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: TopDock
     steps:
       - uses: actions/checkout@v7
       - name: Package
