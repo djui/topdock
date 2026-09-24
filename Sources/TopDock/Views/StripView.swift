@@ -1,0 +1,115 @@
+import SwiftUI
+import UniformTypeIdentifiers
+
+struct StripView: View {
+    let model: SegmentModel
+
+    var body: some View {
+        let slots = model.layout()
+        let hovered = model.hoveredIndex
+
+        ZStack(alignment: .topLeading) {
+            Color.clear
+
+            ForEach(Array(model.items.enumerated()), id: \.element.id) { index, item in
+                let slot = slots[index]
+                let size = model.iconSize * slot.scale
+
+                IconView(item: item, size: size)
+                    .frame(width: slot.width, height: size)
+                    .contentShape(Rectangle())
+                    .onTapGesture { model.onOpen(item) }
+                    .onDrag { NSItemProvider(object: item.url as NSURL) }
+                    .help(item.name)
+                    .position(x: model.inset + slot.centerX, y: model.iconTop + size / 2)
+
+                if item.isRunning && model.indicator == nil {
+                    RunningDot(isActive: item.isActive)
+                        .position(x: model.inset + slot.centerX, y: model.iconTop + size + 2.5)
+                        .allowsHitTesting(false)
+                }
+            }
+
+            if let hovered, hovered < model.items.count {
+                let slot = slots[hovered]
+                Text(model.items[hovered].name)
+                    .font(.system(size: 11, weight: .medium))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(.regularMaterial, in: Capsule())
+                    .position(
+                        x: model.inset + slot.centerX,
+                        y: model.iconTop + model.iconSize * slot.scale + 15
+                    )
+                    .allowsHitTesting(false)
+            }
+
+            if model.showChevron {
+                ChevronView(overflowCount: model.overflowCount)
+                    .frame(width: SegmentModel.chevronWidth, height: model.barHeight)
+                    .contentShape(Rectangle())
+                    .onTapGesture { model.onChevron() }
+                    .position(
+                        x: model.inset + model.contentMaxX(slots) + SegmentModel.chevronWidth / 2,
+                        y: model.barHeight / 2
+                    )
+            }
+
+            if let indicator = model.indicator {
+                PageIndicator(range: indicator)
+                    .frame(width: model.stripWidth, height: 2)
+                    .position(x: model.inset + model.stripWidth / 2, y: model.barHeight - 2)
+                    .allowsHitTesting(false)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .ignoresSafeArea()
+        .onDrop(of: [.fileURL], isTargeted: nil) { providers, location in
+            let index = model.insertionIndex(atPanelX: location.x)
+            for provider in providers {
+                _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                    guard let url else { return }
+                    Task { @MainActor in model.onDrop(url, index) }
+                }
+            }
+            return !providers.isEmpty
+        }
+    }
+}
+
+private struct ChevronView: View {
+    let overflowCount: Int
+
+    var body: some View {
+        Group {
+            if overflowCount > 0 {
+                Text("+\(overflowCount)")
+                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+            } else {
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9, weight: .bold))
+            }
+        }
+        .foregroundStyle(.primary.opacity(0.8))
+    }
+}
+
+private struct PageIndicator: View {
+    let range: ClosedRange<Double>
+
+    var body: some View {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            ZStack(alignment: .leading) {
+                Capsule().fill(.primary.opacity(0.18))
+                Capsule()
+                    .fill(.primary.opacity(0.75))
+                    .frame(width: max(4, width * (range.upperBound - range.lowerBound)))
+                    .offset(x: width * range.lowerBound)
+            }
+        }
+    }
+}

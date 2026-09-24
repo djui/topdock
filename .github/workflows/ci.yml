@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: swift --version
+      - name: Build app bundle
+        run: scripts/bundle.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TopDock.app
+          path: dist/TopDock.app
+          retention-days: 7
