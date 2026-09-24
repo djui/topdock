@@ -29,6 +29,7 @@ empty center of the menu bar, so you can hide the real Dock and still switch app
 - Drag an app from Finder onto TopDock to pin it; drag pinned icons to reorder them.
   You can also import your existing Dock pins.
 - Multiple displays, launch at login, adjustable icon size, magnification and slot count.
+- An optional menu bar icon and an About window linking back to this project.
 
 ## Install
 
@@ -45,8 +46,11 @@ empty center of the menu bar, so you can hide the real Dock and still switch app
    This lets TopDock measure the app menus and status items and use all the free space.
    Without it, TopDock uses a fixed width that you can adjust.
 
-To open Settings, right-click any icon, click the chevron, or launch TopDock again. TopDock
-has no Dock icon of its own.
+TopDock has no Dock icon of its own. Settings, About and Quit are available from:
+
+- the TopDock icon among the menu bar extras (you can turn it off in Settings),
+- right-clicking any icon in the strip, or clicking its chevron,
+- launching TopDock again while it's running, which always opens Settings.
 
 > Because releases are ad-hoc signed, macOS treats every new version as a different app, so
 > you'll need to re-grant Accessibility access after updating.

@@ -20,23 +20,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var store = AppStore(prefs: prefs)
     private lazy var panels = PanelController(store: store, prefs: prefs)
     private lazy var settings = SettingsWindowController(prefs: prefs, store: store)
+    private let statusItem = StatusItemController()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.mainMenu = makeMainMenu()
 
         prefs.onChange = { [weak self] in
-            self?.store.rebuild()
-            self?.panels.relayout()
+            guard let self else { return }
+            store.rebuild()
+            panels.relayout()
+            statusItem.setVisible(prefs.showMenuBarIcon)
         }
         store.onChange = { [weak self] in
             self?.panels.relayout()
         }
-        panels.onOpenSettings = { [weak self] in
-            self?.settings.show()
-        }
+        panels.onOpenSettings = { [weak self] in self?.settings.show() }
+        panels.onOpenAbout = { AboutPanel.show() }
+        statusItem.onSettings = { [weak self] in self?.settings.show() }
+        statusItem.onAbout = { AboutPanel.show() }
 
         store.start()
         panels.start()
+        statusItem.setVisible(prefs.showMenuBarIcon)
 
         if !prefs.hasLaunchedBefore {
             prefs.hasLaunchedBefore = true
@@ -64,6 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let appItem = NSMenuItem()
         let appMenu = NSMenu()
+        appMenu.addItem(withTitle: "About TopDock", action: #selector(openAbout), keyEquivalent: "")
         appMenu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Quit TopDock", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
@@ -81,5 +87,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openSettings() {
         settings.show()
+    }
+
+    @objc private func openAbout() {
+        AboutPanel.show()
     }
 }

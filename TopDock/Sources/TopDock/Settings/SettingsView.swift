@@ -95,6 +95,12 @@ struct SettingsView: View {
                 Toggle("Clicking the active app hides it", isOn: $prefs.clickActiveHides)
                 Toggle("Hide when the menu bar is hidden (fullscreen, auto-hide)", isOn: $prefs.hideWhenMenuBarHidden)
                 Toggle("Show on all displays", isOn: $prefs.allDisplays)
+                VStack(alignment: .leading, spacing: 4) {
+                    Toggle("Show TopDock icon in the menu bar", isOn: $prefs.showMenuBarIcon)
+                    Text("When the icon is hidden, open TopDock again (from Finder, Spotlight or Launchpad) to bring up this window.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 Toggle("Launch at login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, enabled in
                         do {
@@ -135,13 +141,15 @@ struct SettingsView: View {
 
             Section {
                 LabeledContent("TopDock \(version)") {
-                    Link("GitHub", destination: URL(string: "https://github.com/djui/topdock")!)
+                    HStack {
+                        Button("About TopDock") { AboutPanel.show() }
+                        Button("Quit TopDock") { NSApp.terminate(nil) }
+                    }
                 }
             }
         }
         .formStyle(.grouped)
-        .frame(width: 500)
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(width: 500, height: 640)
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
             accessibilityTrusted = AXIsProcessTrusted()
         }

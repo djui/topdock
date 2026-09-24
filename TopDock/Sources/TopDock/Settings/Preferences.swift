@@ -34,6 +34,7 @@ final class Preferences {
     var hideWhenMenuBarHidden: Bool { didSet { save("hideWhenMenuBarHidden", hideWhenMenuBarHidden) } }
     var clickActiveHides: Bool { didSet { save("clickActiveHides", clickActiveHides) } }
     var fallbackWidth: Double { didSet { save("fallbackWidth", fallbackWidth) } }
+    var showMenuBarIcon: Bool { didSet { save("showMenuBarIcon", showMenuBarIcon) } }
 
     var hasLaunchedBefore: Bool {
         get { UserDefaults.standard.bool(forKey: "hasLaunchedBefore") }
@@ -55,6 +56,7 @@ final class Preferences {
             "hideWhenMenuBarHidden": true,
             "clickActiveHides": false,
             "fallbackWidth": 420.0,
+            "showMenuBarIcon": true,
         ])
         iconSize = d.double(forKey: "iconSize")
         magnify = d.bool(forKey: "magnify")
@@ -68,6 +70,7 @@ final class Preferences {
         hideWhenMenuBarHidden = d.bool(forKey: "hideWhenMenuBarHidden")
         clickActiveHides = d.bool(forKey: "clickActiveHides")
         fallbackWidth = d.double(forKey: "fallbackWidth")
+        showMenuBarIcon = d.bool(forKey: "showMenuBarIcon")
     }
 
     private func save(_ key: String, _ value: Any) {

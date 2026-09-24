@@ -86,6 +86,7 @@ final class SegmentPanel {
 @MainActor
 final class PanelController {
     var onOpenSettings: () -> Void = {}
+    var onOpenAbout: () -> Void = {}
 
     private let store: AppStore
     private let prefs: Preferences
@@ -101,7 +102,11 @@ final class PanelController {
     private var indicatorUntil = Date.distantPast
 
     private var menus: MenuFactory {
-        MenuFactory(store: store, openSettings: { [weak self] in self?.onOpenSettings() })
+        MenuFactory(
+            store: store,
+            openSettings: { [weak self] in self?.onOpenSettings() },
+            openAbout: { [weak self] in self?.onOpenAbout() }
+        )
     }
 
     init(store: AppStore, prefs: Preferences) {

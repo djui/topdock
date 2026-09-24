@@ -24,6 +24,7 @@ final class ClosureMenuItem: NSMenuItem {
 struct MenuFactory {
     let store: AppStore
     let openSettings: () -> Void
+    let openAbout: () -> Void
 
     func overflowMenu(for items: [DockItem]) -> NSMenu {
         let menu = NSMenu()
@@ -80,6 +81,7 @@ struct MenuFactory {
     private func appendAppItems(to menu: NSMenu) {
         menu.addItem(ClosureMenuItem("Import Pins from Dock") { store.importDockPins() })
         menu.addItem(ClosureMenuItem("TopDock Settings…") { openSettings() })
+        menu.addItem(ClosureMenuItem("About TopDock") { openAbout() })
         menu.addItem(ClosureMenuItem("Quit TopDock") { NSApp.terminate(nil) })
     }
 }
