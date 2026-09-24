@@ -17,6 +17,7 @@ final class Preferences {
     var clickActiveHides: Bool { didSet { save("clickActiveHides", clickActiveHides) } }
     var fallbackWidth: Double { didSet { save("fallbackWidth", fallbackWidth) } }
     var showMenuBarIcon: Bool { didSet { save("showMenuBarIcon", showMenuBarIcon) } }
+    var haptics: Bool { didSet { save("haptics", haptics) } }
 
     var hasLaunchedBefore: Bool {
         get { UserDefaults.standard.bool(forKey: "hasLaunchedBefore") }
@@ -37,6 +38,7 @@ final class Preferences {
             "clickActiveHides": false,
             "fallbackWidth": 420.0,
             "showMenuBarIcon": true,
+            "haptics": true,
         ])
         iconSize = d.double(forKey: "iconSize")
         iconSpacing = d.double(forKey: "iconSpacing")
@@ -49,6 +51,7 @@ final class Preferences {
         clickActiveHides = d.bool(forKey: "clickActiveHides")
         fallbackWidth = d.double(forKey: "fallbackWidth")
         showMenuBarIcon = d.bool(forKey: "showMenuBarIcon")
+        haptics = d.bool(forKey: "haptics")
     }
 
     private func save(_ key: String, _ value: Any) {

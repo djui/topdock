@@ -59,6 +59,12 @@ struct SettingsView: View {
                 }
                 .disabled(!prefs.magnify)
                 VStack(alignment: .leading, spacing: 4) {
+                    Toggle("Haptic feedback on hover", isOn: $prefs.haptics)
+                    Text("Taps the Force Touch trackpad when moving between icons.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                VStack(alignment: .leading, spacing: 4) {
                     Toggle("Show notification badges", isOn: $prefs.showBadges)
                     Text("Shows the same red badges as the Dock. Requires Accessibility access.")
                         .font(.caption)

@@ -11,6 +11,8 @@ final class SegmentPanel {
     var screen: NSScreen
     var baseFrame: NSRect = .zero
     var hasContent = false
+    var haptics = true
+    private var lastHoveredID: String?
     private(set) var isExpanded = false
     private(set) var isShown = false
 
@@ -50,11 +52,20 @@ final class SegmentPanel {
             applyFrame()
         }
         model.mouseX = location.x - baseFrame.minX - Self.padding
+
+        let id = model.hoveredIndex.flatMap { model.entries[$0].item?.id }
+        if id != lastHoveredID {
+            lastHoveredID = id
+            if haptics, id != nil {
+                NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+            }
+        }
     }
 
     func endHover() {
         guard isExpanded else { return }
         isExpanded = false
+        lastHoveredID = nil
         model.mouseX = nil
         model.inset = Self.padding
         applyFrame()
@@ -297,6 +308,7 @@ final class PanelController {
         model.magnify = prefs.magnify
         model.maxScale = prefs.magnification
         model.indicator = indicator
+        panel.haptics = prefs.haptics
 
         model.onOpen = { [weak self] item in self?.store.open(item) }
         model.onChevron = { [weak self] in

@@ -18,7 +18,8 @@ empty center of the menu bar, so you can hide the real Dock and still switch app
   apps, or fewer when space runs out. Rearrange apps in the Dock and TopDock follows.
 - **Overflow that doesn't get in the way.** Apps that don't fit collapse into a `+N` chevron
   menu. Scrolling or swiping over the icons pages through the full list.
-- **Dock-style magnification** on hover, with the app name shown below the icon.
+- **Dock-style magnification** on hover, with the app name shown below the icon, and a light
+  Force Touch trackpad tap as you move between icons.
 - **Notch-aware.** On MacBooks with a notch the icons continue from the left side of the notch
   to the right, keeping the Dock's order. Top-center overlays such as notch or
   "dynamic island" apps are treated the same way.
