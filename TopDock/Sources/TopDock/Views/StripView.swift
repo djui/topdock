@@ -16,13 +16,20 @@ struct StripView: View {
                 switch entry {
                 case .app(let item):
                     let size = model.iconSize * slot.scale
+                    // The click target spans the whole column from the screen's top edge,
+                    // so flinging the cursor against the top still hits the icon.
+                    let columnHeight = max(model.barHeight, model.iconTop + size + 4)
 
                     IconView(item: item, size: size)
-                        .frame(width: slot.width, height: size)
+                        .position(x: model.inset + slot.centerX, y: model.iconTop + size / 2)
+                        .allowsHitTesting(false)
+
+                    Color.clear
+                        .frame(width: slot.width, height: columnHeight)
                         .contentShape(Rectangle())
                         .onTapGesture { model.onOpen(item) }
                         .help(item.name)
-                        .position(x: model.inset + slot.centerX, y: model.iconTop + size / 2)
+                        .position(x: model.inset + slot.centerX, y: columnHeight / 2)
 
                     if item.isRunning && model.indicator == nil {
                         RunningDot(isActive: item.isActive)

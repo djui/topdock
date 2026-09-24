@@ -14,7 +14,7 @@ struct IconView: View {
                 if item.isActive {
                     RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
                         .fill(.white.opacity(0.22))
-                        .frame(width: size + 5, height: size + 5)
+                        .frame(width: size + 3, height: size + 3)
                         .blur(radius: 1.5)
                 }
             }

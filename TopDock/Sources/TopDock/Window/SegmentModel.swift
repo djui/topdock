@@ -26,7 +26,7 @@ final class SegmentModel {
     var overflowCount = 0
     var showChevron = false
     var iconSize: CGFloat = 18
-    var spacing: CGFloat = 5
+    var spacing: CGFloat = 2
     var barHeight: CGFloat = 24
     var magnify = true
     var maxScale: CGFloat = 1.8
@@ -40,8 +40,8 @@ final class SegmentModel {
     @ObservationIgnored var onOpen: (DockItem) -> Void = { _ in }
     @ObservationIgnored var onChevron: () -> Void = {}
 
-    static let chevronWidth: CGFloat = 24
-    static let dividerWidth: CGFloat = 9
+    static let chevronWidth: CGFloat = 20
+    static let dividerWidth: CGFloat = 7
 
     var slot: CGFloat { iconSize + spacing }
     var iconTop: CGFloat { max(0, (barHeight - iconSize) / 2 - 1.5) }

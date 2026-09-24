@@ -47,6 +47,12 @@ struct SettingsView: View {
                         Text("\(Int(prefs.iconSize)) pt").monospacedDigit().frame(width: 40, alignment: .trailing)
                     }
                 }
+                LabeledContent("Icon spacing") {
+                    HStack {
+                        Slider(value: $prefs.iconSpacing, in: 0...8, step: 1)
+                        Text("\(Int(prefs.iconSpacing)) pt").monospacedDigit().frame(width: 40, alignment: .trailing)
+                    }
+                }
                 Toggle("Magnify icons on hover", isOn: $prefs.magnify)
                 Slider(value: $prefs.magnification, in: 1.2...2.6) {
                     Text("Magnification")

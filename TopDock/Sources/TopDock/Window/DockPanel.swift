@@ -22,6 +22,9 @@ final class DockPanel: NSPanel {
         isMovable = false
         isReleasedWhenClosed = false
         animationBehavior = .none
+        // Set explicitly so clicks on transparent pixels (e.g. the topmost row above an
+        // icon) reach the panel instead of passing through to the menu bar.
+        ignoresMouseEvents = false
         collectionBehavior = Self.baseBehavior
     }
 

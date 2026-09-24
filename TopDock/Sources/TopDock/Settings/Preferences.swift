@@ -7,6 +7,7 @@ final class Preferences {
     @ObservationIgnored var onChange: (() -> Void)?
 
     var iconSize: Double { didSet { save("iconSize", iconSize) } }
+    var iconSpacing: Double { didSet { save("iconSpacing", iconSpacing) } }
     var magnify: Bool { didSet { save("magnify", magnify) } }
     var magnification: Double { didSet { save("magnification", magnification) } }
     var maxSlots: Int { didSet { save("maxSlots", maxSlots) } }
@@ -25,6 +26,7 @@ final class Preferences {
         let d = UserDefaults.standard
         d.register(defaults: [
             "iconSize": 18.0,
+            "iconSpacing": 2.0,
             "magnify": true,
             "magnification": 1.8,
             "maxSlots": 40,
@@ -35,6 +37,7 @@ final class Preferences {
             "showMenuBarIcon": true,
         ])
         iconSize = d.double(forKey: "iconSize")
+        iconSpacing = d.double(forKey: "iconSpacing")
         magnify = d.bool(forKey: "magnify")
         magnification = d.double(forKey: "magnification")
         maxSlots = d.integer(forKey: "maxSlots")

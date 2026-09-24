@@ -3,7 +3,7 @@ import AppKit
 /// One panel showing one strip of icons.
 @MainActor
 final class SegmentPanel {
-    static let padding: CGFloat = 4
+    static let padding: CGFloat = 2
     static let labelHeight: CGFloat = 30
 
     let panel = DockPanel()
@@ -170,7 +170,7 @@ final class PanelController {
         let windows = WindowList.snapshot()
         let dock = store.layout
         let mainApps = dock.dockApps + dock.otherRunning
-        let slot = prefs.iconSize + 5
+        let slot = prefs.iconSize + prefs.iconSpacing
 
         var screens = NSScreen.screens
         if !prefs.allDisplays || !NSScreen.screensHaveSeparateSpaces {
@@ -292,6 +292,7 @@ final class PanelController {
         model.showChevron = overflow != nil
         model.overflowCount = overflow?.count ?? 0
         model.iconSize = prefs.iconSize
+        model.spacing = prefs.iconSpacing
         model.barHeight = barHeight
         model.magnify = prefs.magnify
         model.maxScale = prefs.magnification
