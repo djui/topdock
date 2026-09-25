@@ -21,7 +21,7 @@ struct IconView: View {
             .overlay(alignment: .topTrailing) {
                 if let badge = item.badge {
                     BadgeView(text: badge, iconSize: size)
-                        .offset(x: size * 0.22, y: -size * 0.1)
+                        .offset(x: size * 0.1, y: -size * 0.02)
                 }
             }
     }
@@ -42,7 +42,7 @@ struct BadgeView: View {
             .padding(.horizontal, text.count > 1 ? height * 0.25 : 0)
             .frame(minWidth: height, minHeight: height)
             .background(Capsule().fill(Color(nsColor: .systemRed)))
-            .shadow(color: .black.opacity(0.25), radius: 0.5, y: 0.5)
+            .shadow(color: .black.opacity(0.35), radius: 1.5)
     }
 }
 
